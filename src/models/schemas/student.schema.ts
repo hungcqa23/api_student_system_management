@@ -1,23 +1,21 @@
 import { Schema, model } from 'mongoose';
 
-interface StudentType {
+export interface StudentType {
   _id: string;
   studentId: string;
+  courseId: string;
   fullName: string;
   phoneNumber: string;
-  phoneNumberRelative: string;
-  fullNameRelative: string;
-  addressRelative: string;
   email: string;
-  dateOfBirth: Date;
+  dateOfBirth: string;
   address: string;
-  password: string;
-  status: string;
   courses: string;
+  status: string;
   createdAt: Date;
   updatedAt: Date;
 }
-const UserSchema = new Schema({
+
+const StudentSchema = new Schema({
   studentId: {
     type: String,
     required: [true, 'Student ID is required']
@@ -30,38 +28,25 @@ const UserSchema = new Schema({
     type: String,
     required: [true, 'Phone number is required']
   },
-  phoneNumberRelative: {
-    type: String
-  },
-  fullNameRelative: {
-    type: String
-  },
-  addressRelative: {
-    type: String
-  },
   email: {
     type: String,
     required: [true, 'Email is required']
   },
   dateOfBirth: {
-    type: Date,
+    type: String,
     required: [true, 'Date of birth is required']
   },
   address: {
     type: String,
     required: [true, 'Address is required']
   },
-  password: {
-    type: String,
-    required: [true, 'Password is required']
-  },
   status: {
     type: String,
     enum: ['đang học', 'đã học', 'thôi học'],
     default: 'đang học'
   },
-  course: {
-    type: [Schema.Types.ObjectId],
+  courseId: {
+    type: Schema.Types.ObjectId,
     ref: 'Course'
   },
   updatedAt: {
@@ -78,5 +63,7 @@ const UserSchema = new Schema({
   }
 });
 
-const Student = model<StudentType>('Student', UserSchema);
+StudentSchema.index({ studentId: 1, courseId: 1 }, { unique: true });
+
+const Student = model<StudentType>('Student', StudentSchema);
 export default Student;

@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-interface CourseType {
+export interface CourseType {
   _id: string;
   courseId: string;
   courseName: string;
