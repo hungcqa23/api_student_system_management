@@ -3,7 +3,7 @@ import catchAsync from '~/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 import { MESSAGES } from '~/constants/messages';
 import { calculateEndDate } from '~/utils/date';
-import Attendance from '~/models/schemas/attendance.schema';
+import Attendance, { AttendanceType } from '~/models/schemas/attendance.schema';
 import AppError from '~/utils/app-error';
 
 const createAttendance = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -37,14 +37,16 @@ const createAttendance = catchAsync(async (req: Request, res: Response, next: Ne
 const getAllAttendances = factory.getAll(Attendance);
 
 const getAttendance = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  console.log(req.params.id);
-  const doc = await Attendance.find({
+  const attendances: AttendanceType[] | null = await Attendance.find({
     courseId: req.params.id
   });
 
-  if (!doc) {
+  if (!attendances) {
     return next(new AppError(MESSAGES.NO_DOCUMENT_WAS_FOUND, 404));
   }
+
+  // Filter out entries where studentId is null
+  const doc = attendances.filter(attendance => attendance.studentId !== null);
 
   res.status(200).json({
     status: 'success',

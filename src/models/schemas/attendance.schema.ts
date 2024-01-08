@@ -1,6 +1,6 @@
 import { Query, Schema, model } from 'mongoose';
 
-interface AttendanceType {
+export interface AttendanceType {
   _id: string;
   studentId: string;
   courseId: string;
@@ -21,11 +21,14 @@ const AttendanceSchema = new Schema({
 });
 
 AttendanceSchema.pre(/^find/, function (next) {
-  (this as Query<any, any, {}, any, 'find'>).populate({
+  const query = this as Query<any, any, {}, any, 'find'>;
+  // Populate studentId and filter out documents with null studentId
+  query.populate({
     path: 'studentId',
     select: 'fullName studentId',
     match: { active: true }
   });
+
   next();
 });
 
