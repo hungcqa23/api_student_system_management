@@ -68,6 +68,10 @@ const CourseSchema = new Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  tuitionFee: {
+    type: Number,
+    required: true
   }
 });
 

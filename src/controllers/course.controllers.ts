@@ -4,9 +4,10 @@ import catchAsync from '~/utils/catchAsync';
 import { Request, Response, NextFunction } from 'express';
 import { MESSAGES } from '~/constants/messages';
 import { calculateEndDate } from '~/utils/date';
+import Student, { StudentType } from '~/models/schemas/student.schema';
 
-const createCourse = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const { courseId, courseName, dateOfWeeks, dateOfStart, sessions } = req.body;
+const createCourse = catchAsync(async (req: Request, res: Response) => {
+  const { courseId, courseName, dateOfWeeks, dateOfStart, sessions, tuitionFee } = req.body;
   const dates: string[] = [];
   const dateOfEnd = calculateEndDate({
     dateOfStart: dateOfStart,
@@ -19,16 +20,35 @@ const createCourse = catchAsync(async (req: Request, res: Response, next: NextFu
     courseId,
     courseName,
     dateOfWeeks,
-    dateOfEnd,
+    dateOfEnd: dates[dates.length - 1] || dateOfEnd,
     dateOfStart,
     dates,
-    sessions
+    sessions,
+    tuitionFee
   });
 
   res.status(201).json({
     status: MESSAGES.CREATED_SUCCESSFULLY,
     data: {
       doc
+    }
+  });
+});
+
+const getStatistics = catchAsync(async (req: Request, res: Response) => {
+  const courses = await Course.find({
+    active: true
+  });
+  const students: StudentType[] = await Student.find({
+    active: true
+  });
+  const studentsSet = new Set(students.map(student => student.email));
+
+  res.status(201).json({
+    status: MESSAGES.CREATED_SUCCESSFULLY,
+    data: {
+      numberCourses: courses.length,
+      numberStudents: studentsSet.size
     }
   });
 });
@@ -43,5 +63,6 @@ export default {
   getCourse,
   createCourse,
   deleteCourse,
-  updateCourse
+  updateCourse,
+  getStatistics
 };

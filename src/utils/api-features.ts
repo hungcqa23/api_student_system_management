@@ -40,7 +40,7 @@ class APIFeatures<T extends Document> {
       const sortBy = this.queryString.sort.split(',').join(' ');
       this.query = this.query.sort(sortBy);
     } else {
-      this.query = this.query.sort('-ratingsQuantity');
+      this.query = this.query.sort('courseId studentId');
     }
 
     return this;

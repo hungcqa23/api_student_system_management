@@ -11,11 +11,11 @@ import MongoDB from '../src/utils/mongodb';
 import usersRouter from './routes/user.routes';
 import coursesRouter from './routes/course.routes';
 import studentsRouter from './routes/student.routes';
+import attendancesRouter from './routes/attendance.routes';
 
 import HTTP_STATUS from './constants/httpStatus';
 import AppError from './utils/app-error';
 import globalErrorHandler from './controllers/error.controllers';
-import { CourseData, calculateEndDate } from './utils/date';
 
 // Create a new MongoDB instance
 MongoDB.getInstance().newConnection();
@@ -43,6 +43,7 @@ app.use(express.json());
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/courses', coursesRouter);
 app.use('/api/v1/students', studentsRouter);
+app.use('/api/v1/attendances', attendancesRouter);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, HTTP_STATUS.NOT_FOUND));

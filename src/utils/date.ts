@@ -21,7 +21,6 @@ export function calculateEndDate(courseData: CourseData): string {
     const dayOfWeek = currentDate.format('dddd');
     const scheduleForDay = weeklySchedule.find(schedule => {
       const days = schedule.split(' ');
-
       return days[0] === dayOfWeek;
     });
 

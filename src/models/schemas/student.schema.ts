@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Query, Schema, model } from 'mongoose';
 
 export interface StudentType {
   _id: string;
@@ -63,7 +63,17 @@ const StudentSchema = new Schema({
   }
 });
 
+StudentSchema.index({ email: 1, courseId: 1 }, { unique: true });
 StudentSchema.index({ studentId: 1, courseId: 1 }, { unique: true });
+
+StudentSchema.pre(/^findOne/, function (next) {
+  (this as Query<any, any, {}, any, 'find'>).populate({
+    path: 'courseId',
+    select: 'courseName'
+  });
+
+  next();
+});
 
 const Student = model<StudentType>('Student', StudentSchema);
 export default Student;

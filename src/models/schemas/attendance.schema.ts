@@ -1,34 +1,34 @@
-import { Schema, model } from 'mongoose';
+import { Query, Schema, model } from 'mongoose';
 
 interface AttendanceType {
   _id: string;
   studentId: string;
-  attendanceDates: {
-    date: Date;
-    status: string;
-  }[];
+  courseId: string;
+  attendanceDates: boolean[];
 }
-const attendanceSchema = new Schema({
+const AttendanceSchema = new Schema({
   studentId: {
     type: Schema.Types.ObjectId,
     ref: 'Student',
     required: true
   },
-  attendanceDates: [
-    {
-      date: {
-        type: String,
-        required: true
-      },
-      status: {
-        type: String,
-        enum: ['yes', 'no'],
-        default: 'no'
-      }
-    }
-  ]
+  courseId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Course',
+    required: true
+  },
+  attendanceDates: [Boolean]
 });
 
-const Attendance = model<AttendanceType>('Attendance', attendanceSchema);
+AttendanceSchema.pre(/^find/, function (next) {
+  (this as Query<any, any, {}, any, 'find'>).populate({
+    path: 'studentId',
+    select: 'fullName studentId',
+    match: { active: true }
+  });
+  next();
+});
+
+const Attendance = model<AttendanceType>('Attendance', AttendanceSchema);
 
 export default Attendance;
