@@ -6,6 +6,7 @@ import Student, { StudentType } from '~/models/schemas/student.schema';
 import Course, { CourseType } from '~/models/schemas/course.schema';
 import AppError from '~/utils/app-error';
 import Attendance from '~/models/schemas/attendance.schema';
+import TuitionFee from '~/models/schemas/tuition-fee.schema';
 
 const createStudent = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { studentId, fullName, phoneNumber, dateOfBirth, address, email, courseId } = req.body;
@@ -28,11 +29,19 @@ const createStudent = catchAsync(async (req: Request, res: Response, next: NextF
     return next(new AppError(MESSAGES.NO_DOCUMENT_WAS_FOUND, 404));
   }
   const dates = Array.from({ length: course.sessions }).fill(false);
-  await Attendance.create({
-    studentId: doc._id,
-    courseId: course?._id,
-    attendanceDates: dates
-  });
+
+  await Promise.all([
+    Attendance.create({
+      studentId: doc._id,
+      courseId: course?._id,
+      attendanceDates: dates
+    }),
+    TuitionFee.create({
+      studentId: doc._id,
+      courseId: course?._id,
+      hasTuitionFee: false
+    })
+  ]);
 
   res.status(201).json({
     status: MESSAGES.CREATED_SUCCESSFULLY,

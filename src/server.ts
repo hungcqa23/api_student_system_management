@@ -12,6 +12,7 @@ import usersRouter from './routes/user.routes';
 import coursesRouter from './routes/course.routes';
 import studentsRouter from './routes/student.routes';
 import attendancesRouter from './routes/attendance.routes';
+import tuitionFeesRouter from './routes/tuition-fee.routes';
 
 import HTTP_STATUS from './constants/httpStatus';
 import AppError from './utils/app-error';
@@ -44,6 +45,7 @@ app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/courses', coursesRouter);
 app.use('/api/v1/students', studentsRouter);
 app.use('/api/v1/attendances', attendancesRouter);
+app.use('/api/v1/tuition-fees', tuitionFeesRouter);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, HTTP_STATUS.NOT_FOUND));

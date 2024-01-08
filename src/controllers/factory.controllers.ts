@@ -8,7 +8,7 @@ import { MESSAGES } from '../constants/messages';
 import HTTP_STATUS from '~/constants/httpStatus';
 
 const getAll = (Model: Model<any>): GetAllFn => {
-  return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  return catchAsync(async (req: Request, res: Response) => {
     let filter = {};
     if (req.params.id) filter = { book: req.params.id };
     const features = new APIFeatures(Model.find(filter), req.query).filter().sort().limitFields().paginate();
