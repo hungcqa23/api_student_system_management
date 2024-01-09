@@ -4,6 +4,8 @@ const router: Router = express.Router();
 
 router.route('/').get(courseControllers.getAllCourse).post(courseControllers.createCourse);
 router.get('/statistics', courseControllers.getStatistics);
+router.get('/course-name', courseControllers.getCourseName);
+router.post('/recovery/:id', courseControllers.recoverCourse);
 router
   .route('/:id')
   .get(courseControllers.getCourse)

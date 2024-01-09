@@ -1,9 +1,9 @@
-import express, { NextFunction, Request, Response, Router } from 'express';
+import express, { Router } from 'express';
 import authController from '../controllers/auth.controllers';
 import userController from '../controllers/user.controllers';
 const router: Router = express.Router();
 
-router.post('/signup', authController.signUp);
+router.post('/sign-up', authController.signUp);
 router.post('/login', authController.logIn);
 router.post('/forgot-password', authController.forgotPassword);
 router.patch('/reset-password/:token', authController.resetPassword);
