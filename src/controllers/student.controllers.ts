@@ -51,6 +51,7 @@ const createStudent = catchAsync(async (req: Request, res: Response, next: NextF
   });
 });
 
+// const getAllStudent = factory.getAll(Student);
 const getAllStudent = factory.getAll(Student);
 const getStudent = factory.getOne(Student);
 const deleteStudent = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -69,11 +70,34 @@ const deleteStudent = catchAsync(async (req: Request, res: Response, next: NextF
   });
 });
 const updateStudent = factory.updateOne(Student);
+const recoverStudent = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const student: StudentType | null = await Student.findByIdAndUpdate(
+    req.params.id,
+    { active: true },
+    {
+      new: true
+    }
+  );
+  if (!student) {
+    return next(new AppError(MESSAGES.NO_DOCUMENT_WAS_FOUND, 404));
+  }
+  await Course.findByIdAndUpdate(student.courseId, {
+    $inc: { numberOfStudents: 1 }
+  });
+
+  res.status(200).json({
+    status: MESSAGES.UPDATED_SUCCESSFULLY,
+    data: {
+      student
+    }
+  });
+});
 
 export default {
   getAllStudent,
   getStudent,
   createStudent,
   deleteStudent,
-  updateStudent
+  updateStudent,
+  recoverStudent
 };
