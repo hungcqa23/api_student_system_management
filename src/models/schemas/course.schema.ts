@@ -44,6 +44,11 @@ const CourseSchema = new Schema({
     type: String,
     required: [true, 'Date of start is required']
   },
+  numberOfGrades: {
+    type: Number,
+    required: [true, 'Number of grades is required'],
+    default: 3
+  },
   dates: {
     type: [
       {

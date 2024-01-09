@@ -7,6 +7,7 @@ import Course, { CourseType } from '~/models/schemas/course.schema';
 import AppError from '~/utils/app-error';
 import Attendance from '~/models/schemas/attendance.schema';
 import TuitionFee from '~/models/schemas/tuition-fee.schema';
+import Grade from '~/models/schemas/grade.schema';
 
 const createStudent = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { studentId, fullName, phoneNumber, dateOfBirth, address, email, courseId } = req.body;
@@ -40,6 +41,11 @@ const createStudent = catchAsync(async (req: Request, res: Response, next: NextF
       studentId: doc._id,
       courseId: course?._id,
       hasTuitionFee: false
+    }),
+    Grade.create({
+      student: doc._id,
+      course: course?._id,
+      grades: []
     })
   ]);
 

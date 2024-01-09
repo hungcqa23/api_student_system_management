@@ -1,7 +1,7 @@
 import { Transporter, createTransport } from 'nodemailer';
 import pug from 'pug';
 import { convert } from 'html-to-text';
-import { IUser, SendinblueConfig } from '../models/interfaces/model.interfaces';
+import { SendinblueConfig } from '../models/interfaces/model.interfaces';
 
 export default class Email {
   private to: string;
@@ -9,10 +9,16 @@ export default class Email {
   private url: string;
   private from: string;
 
-  constructor(user: IUser, url: string) {
+  constructor(
+    user: {
+      email: string;
+      fullName?: string;
+    },
+    url?: string
+  ) {
     this.to = user.email;
-    this.firstName = user.fullName || 'My Friend';
-    this.url = url;
+    this.firstName = user?.fullName || 'Các bạn học sinh';
+    this.url = url || 'http://localhost:3000';
     this.from = `${process.env.EMAIL_FROM}`;
   }
 
@@ -29,7 +35,7 @@ export default class Email {
         pass: process.env.SENDINBLUE_PASSWORD
       }
     };
-    console.log;
+
     return createTransport(config);
     // }
 
@@ -51,12 +57,13 @@ export default class Email {
     return pug.renderFile(templatePath, options);
   }
   // Send the actual email
-  async send(template: string, subject: string): Promise<void> {
+  async send(template: string, subject: string, message?: string): Promise<void> {
     // 1) Render HTML based on a pug template
     const html = this.renderTemplate(template, {
       firstName: this.firstName,
       url: this.url,
-      subject
+      subject,
+      message
     });
 
     // 2) Define email options
@@ -69,8 +76,8 @@ export default class Email {
         wordwrap: false
       })
     };
-
     // 3) Create a transport and send mail
+
     try {
       await this.newTransport().sendMail(mailOptions);
       console.log(`Email sent to ${this.to} successfully`);
@@ -85,5 +92,9 @@ export default class Email {
 
   async sendPasswordReset(): Promise<void> {
     await this.send('passwordReset', 'Your password reset token (valid only 10 minutes)');
+  }
+
+  async sendNotification(message: string): Promise<void> {
+    await this.send('notification', 'Thông báo mới', message);
   }
 }

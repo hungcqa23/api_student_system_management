@@ -6,6 +6,7 @@ import { MESSAGES } from '~/constants/messages';
 import { calculateEndDate } from '~/utils/date';
 import Student, { StudentType } from '~/models/schemas/student.schema';
 import AppError from '~/utils/app-error';
+import Email from '~/utils/email';
 
 const createCourse = catchAsync(async (req: Request, res: Response) => {
   const { courseId, courseName, dateOfWeeks, dateOfStart, sessions, tuitionFee } = req.body;
@@ -35,7 +36,6 @@ const createCourse = catchAsync(async (req: Request, res: Response) => {
     }
   });
 });
-
 const getStatistics = catchAsync(async (req: Request, res: Response) => {
   const courses = await Course.find({
     active: true
@@ -74,6 +74,57 @@ const getCourseName = catchAsync(async (req: Request, res: Response, next: NextF
     doc: uniqueCourseNames
   });
 });
+const getCourseIdByCourseName = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const courses: CourseType[] | null = await Course.find({ courseName: req.params.courseName });
+  if (!courses) {
+    return next(new AppError(MESSAGES.NO_DOCUMENT_WAS_FOUND, 404));
+  }
+
+  const courseIds = courses.map(course => course.courseId);
+
+  res.status(200).json({
+    success: true,
+    courseIds
+  });
+});
+const notifyStudents = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { courseName, message } = req.body;
+
+  if (courseName === 'Tất cả') {
+    const students = await Student.find({ active: true });
+    const uniqueEmails: Set<string> = new Set();
+
+    students.forEach(student => {
+      // Đảm bảo rằng mỗi địa chỉ email là duy nhất
+      if (student.email && !uniqueEmails.has(student.email)) {
+        uniqueEmails.add(student.email);
+      }
+    });
+    // Chuyển Set thành mảng để có thể sử dụng map
+    const studentEmails: string[] = Array.from(uniqueEmails);
+
+    await Promise.all(studentEmails.map(email => new Email({ email }).sendNotification(message)));
+
+    return res.status(200).json({
+      message: 'Gửi mail tất cả thành công!',
+      studentEmails
+    });
+  }
+
+  const course = await Course.findOne({ courseName });
+  if (!course) {
+    return next(new AppError(MESSAGES.NO_DOCUMENT_WAS_FOUND, 404));
+  }
+  const students = await Student.find({
+    active: true,
+    courseId: course._id
+  });
+  await Promise.all(students.map(student => new Email({ email: student.email }).sendNotification(message)));
+
+  res.status(200).json({
+    message: 'Gửi mail thành công!'
+  });
+});
 
 const getAllCourse = factory.getAll(Course);
 const getCourse = factory.getOne(Course);
@@ -84,9 +135,11 @@ export default {
   getAllCourse,
   getCourse,
   getCourseName,
+  getCourseIdByCourseName,
+  getStatistics,
+  notifyStudents,
   createCourse,
   deleteCourse,
   updateCourse,
-  recoverCourse,
-  getStatistics
+  recoverCourse
 };

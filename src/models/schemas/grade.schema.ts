@@ -1,32 +1,26 @@
-import { Schema, model } from 'mongoose';
+import { Query, Schema, model } from 'mongoose';
 
-interface CourseType {
+export interface GradeType {
   _id: string;
   student: string;
   course: string;
-  firstGrade: number;
-  secondGrade: number;
-  thirdGrade: number;
+  grades: Record<number, number>;
   createdAt: Date;
 }
 
-const CourseSchema = new Schema({
+const GradeSchema = new Schema({
   student: {
     type: Schema.Types.ObjectId,
     ref: 'Student'
   },
   course: {
-    type: String,
+    type: Schema.Types.ObjectId,
     required: [true, 'Course ID is required']
   },
-  firstGrade: {
-    type: Number
-  },
-  secondGrade: {
-    type: Number
-  },
-  thirdGrade: {
-    type: Number
+  grades: {
+    type: Map,
+    of: Number,
+    default: {}
   },
   createdAt: {
     type: Date,
@@ -34,5 +28,14 @@ const CourseSchema = new Schema({
   }
 });
 
-const Course = model<CourseType>('Course', CourseSchema);
-export default Course;
+GradeSchema.pre(/^find/, function (next) {
+  (this as Query<any, any, {}, any, 'find'>).populate({
+    path: 'student',
+    select: 'fullName studentId',
+    match: { active: true }
+  });
+  next();
+});
+
+const Grade = model<GradeType>('Grade', GradeSchema);
+export default Grade;
