@@ -77,6 +77,22 @@ const deleteStudent = catchAsync(async (req: Request, res: Response, next: NextF
 });
 const updateStudent = factory.updateOne(Student);
 const recoverStudent = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const studentFound:
+    | (StudentType & {
+        courseId: {
+          _id: string;
+        };
+      })
+    | null = await Student.findById(req.params.id);
+  if (!studentFound) {
+    return next(new AppError(MESSAGES.NO_DOCUMENT_WAS_FOUND, 404));
+  }
+  const course: {
+    active: boolean;
+  } | null = await Course.findById(studentFound.courseId._id, { active: true });
+  if (!course?.active) {
+    return next(new AppError(MESSAGES.NO_DOCUMENT_WAS_FOUND, 404));
+  }
   const student: StudentType | null = await Student.findByIdAndUpdate(
     req.params.id,
     { active: true },
