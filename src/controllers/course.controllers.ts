@@ -129,7 +129,27 @@ const notifyStudents = catchAsync(async (req: Request, res: Response, next: Next
 const getAllCourse = factory.getAll(Course);
 const getCourse = factory.getOne(Course);
 const deleteCourse = factory.deleteOne(Course);
-const updateCourse = factory.updateOne(Course);
+const updateCourse = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  if (req.body.active === false) {
+    const course = await Course.findByIdAndUpdate(req.params.id, {
+      active: false,
+      numberOfStudents: 0
+    });
+    await Student.updateMany(
+      {
+        courseId: course?._id
+      },
+      {
+        $set: {
+          active: false
+        }
+      }
+    );
+    res.status(204).json({
+      status: MESSAGES.DELETED_SUCCESSFULLY
+    });
+  } else return factory.updateOne(Course);
+});
 
 export default {
   getAllCourse,
