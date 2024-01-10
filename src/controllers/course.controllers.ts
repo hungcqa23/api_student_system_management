@@ -66,7 +66,9 @@ const recoverCourse = catchAsync(async (req: Request, res: Response, next: NextF
 });
 const getCourseName = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   // Find distinct course names
-  const uniqueCourseNames: string[] = await Course.distinct('courseName');
+  const uniqueCourseNames: string[] = await Course.find({
+    active: true
+  }).distinct('courseName');
 
   // Send the unique list of course names in the response
   res.status(200).json({
